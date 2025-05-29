@@ -34,25 +34,26 @@ public class SourceChunkProcessor
         LogPrefix = $"[SourceId {sourceId}][ChunkId {chunkId}][Key {key}]";
     }
 
-    private async Task<string[]> ShouldProcessBatchAsync(SourceChunkWord[]? words)
+    private async Task<string[]> ShouldProcessBatchAsync(SourceChunkWord[]? chunkWords)
     {
-        if (words is null || words.Length == 0) return [];
+        if (chunkWords is null || chunkWords.Length == 0) return [];
+        var words = chunkWords.Select(w => w.Word);
 
         try
         {
             var batch = s_dbContext.CreateBatchGet<Word>(new BatchGetConfig { OverrideTableName = Environment.GetEnvironmentVariable("WORDS_TABLE_NAME"), ConsistentRead = false });
 
-            foreach (var word in words) batch.AddKey(word.Word);
+            foreach (var word in chunkWords) batch.AddKey(word.Word);
 
             if (batch.TotalKeys == 0) return [];
 
             await batch.ExecuteAsync();
 
-            return [.. batch.Results.Select(w => w.Id)];
+            return [.. words.Except(batch.Results.Select(w => w.Id))];
         }
         catch (Exception ex)
         {
-            Logger.LogError($"{LogPrefix} Failed to check status of existing batch of {words.Length} word(s):");
+            Logger.LogError($"{LogPrefix} Failed to check status of existing batch of {chunkWords.Length} word(s):");
             Logger.LogError($"{LogPrefix} {ex.Message}");
 
             return [];
