@@ -14,16 +14,16 @@ public class QueryWordMessageSender
 
     public QueryWordMessage[] Messages { get; init; }
 
-    public string TargetQueueName { get; init; }
+    public string TargetQueueUrl { get; init; }
 
     protected ILambdaLogger Logger { get; init; }
     protected int TryCount { get; init; } = 3;
 
-    public QueryWordMessageSender(QueryWordMessage[] messages, ILambdaLogger logger, string targetQueueName)
+    public QueryWordMessageSender(QueryWordMessage[] messages, ILambdaLogger logger, string targetQueueUrl)
     {
         Messages = messages;
         Logger = logger;
-        TargetQueueName = targetQueueName;
+        TargetQueueUrl = targetQueueUrl;
     }
 
     private string? TrySerialize(QueryWordMessage message)
@@ -53,7 +53,7 @@ public class QueryWordMessageSender
 
             for (var tryNumber = 1; tryNumber <= TryCount && entryMap.Count != 0; tryNumber++)
             {
-                var batchRequest = new SendMessageBatchRequest(TargetQueueName, [.. entryMap.Values]);
+                var batchRequest = new SendMessageBatchRequest(TargetQueueUrl, [.. entryMap.Values]);
 
                 if (tryNumber > 1) await Task.Delay(250);
 

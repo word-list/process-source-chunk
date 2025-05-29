@@ -88,8 +88,8 @@ public class SourceChunkProcessor
 
         Logger.LogInformation($"{LogPrefix} Should process {messages.Count} message(s)");
 
-        var targetQueueName = Environment.GetEnvironmentVariable("QUERY_WORDS_QUEUE_NAME") ?? throw new Exception("QUERY_WORDS_QUEUE_NAME is not set");
-        await new QueryWordMessageSender([.. messages], Logger, targetQueueName).SendAllMessagesAsync();
+        var targetQueueUrl = Environment.GetEnvironmentVariable("QUERY_WORD_QUEUE_URL") ?? throw new Exception("QUERY_WORDS_QUEUE_NAME is not set");
+        await new QueryWordMessageSender([.. messages], Logger, targetQueueUrl).SendAllMessagesAsync();
 
         Logger.LogInformation($"{LogPrefix} Finished processing chunk");
     }
