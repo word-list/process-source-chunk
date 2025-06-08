@@ -30,21 +30,9 @@
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.1" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.0.5" />
     <PackageReference Include="AWSSDK.SQS" Version="4.0.0.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
-    <PackageReference Include="WordList.Data.Sql" Version="0.1.1" />
+    <PackageReference Include="WordList.Data.Sql" Version="0.2.0" />
     <PackageReference Include="WordList.Common" Version="0.1.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="System.Text.Json" Version="9.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tasks" Version="9.0.5">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
-  <PropertyGroup>
-    <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.EntityFrameworkCore.GeneratedInterceptors</InterceptorsNamespaces>
-  </PropertyGroup>  
 </Project>

@@ -3,11 +3,7 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.RuntimeSupport;
 using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using WordList.Common.Messaging;
-using WordList.Data.Sql;
-
-[assembly: DbContext(typeof(WordDbContext))]
 
 namespace WordList.Processing.ProcessSourceChunk;
 
