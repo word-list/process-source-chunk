@@ -47,7 +47,8 @@ public class SourceChunkProcessor
 
             try
             {
-                var foundWords = await s_wordContext.Words.Where(w => words.Contains(w.Text)).ToListAsync().ConfigureAwait(false);
+                var capturedWords = words;
+                var foundWords = await s_wordContext.Words.Where(w => capturedWords.Contains(w.Text)).ToListAsync().ConfigureAwait(false);
 
                 if (foundWords is null) throw new InvalidOperationException("FoundWords is null");
 
