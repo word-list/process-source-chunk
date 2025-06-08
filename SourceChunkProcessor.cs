@@ -41,9 +41,14 @@ public class SourceChunkProcessor
         if (chunkWords is null || chunkWords.Length == 0) return [];
         var words = chunkWords.Select(w => w.Word).ToArray();
 
+        if (s_wordContext.Words is null) throw new InvalidOperationException("Words dbset is null");
+        if (words is null) throw new InvalidOperationException("Words in chunk is null)");
+
         try
         {
             var foundWords = await s_wordContext.Words.Where(w => words.Contains(w.Text)).ToListAsync().ConfigureAwait(false);
+
+            if (foundWords is null) throw new InvalidOperationException("FoundWords is null");
 
             return [.. words.Except(foundWords.Select(w => w.Text))];
         }
