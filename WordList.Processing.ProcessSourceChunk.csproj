@@ -31,7 +31,7 @@
     <PackageReference Include="AWSSDK.S3" Version="4.0.0.5" />
     <PackageReference Include="AWSSDK.SQS" Version="4.0.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
-    <PackageReference Include="WordList.Data.Sql" Version="0.1.0" />
+    <PackageReference Include="WordList.Data.Sql" Version="0.1.1" />
     <PackageReference Include="WordList.Common" Version="0.1.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="System.Text.Json" Version="9.0.5" />
