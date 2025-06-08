@@ -1,6 +1,8 @@
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.Lambda.Core;
 using Amazon.S3;
+using Microsoft.EntityFrameworkCore;
+using WordList.Data.Sql;
 using WordList.Processing.ProcessSourceChunk.Models;
 
 namespace WordList.Processing.ProcessSourceChunk;
@@ -8,7 +10,7 @@ namespace WordList.Processing.ProcessSourceChunk;
 public class SourceChunkProcessor
 {
     private readonly static AmazonS3Client s_s3 = new();
-    private readonly static DynamoDBContext s_dbContext = new DynamoDBContextBuilder().Build();
+    private readonly static WordDbContext s_wordContext = new();
 
     public string SourceId { get; init; }
     public string ChunkId { get; init; }
@@ -37,19 +39,13 @@ public class SourceChunkProcessor
     private async Task<string[]> ShouldProcessBatchAsync(SourceChunkWord[]? chunkWords)
     {
         if (chunkWords is null || chunkWords.Length == 0) return [];
-        var words = chunkWords.Select(w => w.Word);
+        var words = chunkWords.Select(w => w.Word).ToArray();
 
         try
         {
-            var batch = s_dbContext.CreateBatchGet<Word>(new BatchGetConfig { OverrideTableName = Environment.GetEnvironmentVariable("WORDS_TABLE_NAME"), ConsistentRead = false });
+            var foundWords = await s_wordContext.Words.Where(w => words.Contains(w.Text)).ToListAsync().ConfigureAwait(false);
 
-            foreach (var word in chunkWords) batch.AddKey(word.Word);
-
-            if (batch.TotalKeys == 0) return [];
-
-            await batch.ExecuteAsync();
-
-            return [.. words.Except(batch.Results.Select(w => w.Id))];
+            return [.. words.Except(foundWords.Select(w => w.Text))];
         }
         catch (Exception ex)
         {
