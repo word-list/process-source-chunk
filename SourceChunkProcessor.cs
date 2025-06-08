@@ -47,11 +47,14 @@ public class SourceChunkProcessor
 
             try
             {
-                var foundWords = await s_wordContext.Words.Where(w => words.Any(word => word == w.Text)).ToListAsync().ConfigureAwait(false);
+                var foundWords = await s_wordContext.Database
+                    .SqlQueryRaw<string>("SELECT Text FROM Words WHERE Text = ANY(@words)", new { words = words })
+                    .ToListAsync()
+                    .ConfigureAwait(false);
 
                 if (foundWords is null) throw new InvalidOperationException("FoundWords is null");
 
-                return [.. words.Except(foundWords.Select(w => w.Text))];
+                return [.. words.Except(foundWords)];
             }
             catch (Exception ex)
             {
