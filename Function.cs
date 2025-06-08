@@ -3,7 +3,7 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.RuntimeSupport;
 using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
-using WordList.Processing.ProcessSourceChunk.Models;
+using WordList.Common.Messaging;
 
 namespace WordList.Processing.ProcessSourceChunk;
 
@@ -11,39 +11,29 @@ public class Function
 {
     public static async Task<string> FunctionHandler(SQSEvent input, ILambdaContext context)
     {
-        context.Logger.LogInformation("Entering ProcessSourceChunk FunctionHandler");
+        var log = new LambdaContextLogger(context);
+
+        log.Info("Entering ProcessSourceChunk FunctionHandler");
 
         if (input.Records.Count > 1)
         {
-            context.Logger.LogWarning($"Attempting to process {input.Records.Count} messages - SQS batch size should be set to 1!");
+            log.Warning($"Attempting to process {input.Records.Count} messages - SQS batch size should be set to 1!");
         }
 
-        var messages =
-            input.Records.Select(record =>
-                {
-                    try
-                    {
-                        return JsonHelpers.Deserialize(record.Body, LambdaFunctionJsonSerializerContext.Default.ProcessSourceChunkMessage);
-                    }
-                    catch (Exception)
-                    {
-                        context.Logger.LogWarning($"Ignoring invalid message: {record.Body}");
-                        return null;
-                    }
-                });
+        var messages = MessageQueues.ProcessSourceChunk.Receive(input, log);
 
         foreach (var message in messages)
         {
             if (message is null) continue;
 
-            context.Logger.LogInformation($"Starting source chunk processing for SourceId {message.SourceId}, ChunkId {message.ChunkId} at key {message.Key}");
+            log.Info($"Starting source chunk processing for SourceId {message.SourceId}, ChunkId {message.ChunkId} at key {message.Key}");
 
-            await new SourceChunkProcessor(message.SourceId, message.ChunkId, message.Key, context.Logger).ProcessSourceChunkAsync();
+            await new SourceChunkProcessor(message.SourceId, message.ChunkId, message.Key, log.WithPrefix($"[SourceId={message.SourceId}]")).ProcessSourceChunkAsync().ConfigureAwait(false);
 
-            context.Logger.LogInformation($"Finished source chunk processing for SourceId {message.SourceId}, ChunkId {message.ChunkId} at key {message.Key}");
+            log.Info($"Finished source chunk processing for SourceId {message.SourceId}, ChunkId {message.ChunkId} at key {message.Key}");
         }
 
-        context.Logger.LogInformation("Exiting ProcessSourceChunk FunctionHandler");
+        log.Info("Exiting ProcessSourceChunk FunctionHandler");
 
         return "ok";
     }
@@ -59,8 +49,6 @@ public class Function
 
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(SQSEvent))]
-[JsonSerializable(typeof(ProcessSourceChunkMessage))]
-[JsonSerializable(typeof(QueryWordMessage))]
 public partial class LambdaFunctionJsonSerializerContext : JsonSerializerContext
 {
 }

@@ -32,16 +32,13 @@
     <PackageReference Include="AWSSDK.SQS" Version="4.0.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
     <PackageReference Include="WordList.Data.Sql" Version="0.1.0" />
+    <PackageReference Include="WordList.Common" Version="0.1.0" />
   </ItemGroup>
 <PropertyGroup>
   <InterceptorsNamespaces>
     $(InterceptorsNamespaces);Microsoft.EntityFrameworkCore.GeneratedInterceptors</InterceptorsNamespaces>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tasks" Version="9.0.0">
         <PrivateAssets>all</PrivateAssets>
