@@ -40,17 +40,16 @@ public class SourceChunkProcessor
         try
         {
             if (chunkWords is null || chunkWords.Length == 0) return [];
-            var replaceWords = chunkWords.Where(w => w.ReplaceExisting).Select(w => w.Word).ToArray();
-            var checkWords = chunkWords.Where(w => !w.ReplaceExisting).Select(w => w.Word).ToArray();
+            var words = chunkWords.Select(w => w.Word).ToArray();
 
             try
             {
                 var foundWords = await s_wordDb
-                    .GetExistingWordsAsync(checkWords)
+                    .GetExistingWordsAsync(words)
                     .ToArrayAsync()
                     .ConfigureAwait(false);
 
-                return [.. replaceWords.Concat(checkWords.Except(foundWords))];
+                return [.. words.Except(foundWords)];
             }
             catch (Exception ex)
             {
@@ -93,7 +92,11 @@ public class SourceChunkProcessor
 
         Log.Info($"Should process {shouldProcessWords.Length} message(s)");
 
-        await MessageQueues.QueryWords.SendBatchedMessagesAsync(Log, shouldProcessWords.Select(word => new QueryWordMessage { Word = word })).ConfigureAwait(false);
+        messages.AddRange(shouldProcessWords.Select(word => new QueryWordMessage { Word = word }));
+
+        Log.Info($"Sending {messages.Count} message(s) in total");
+
+        await MessageQueues.QueryWords.SendBatchedMessagesAsync(Log, messages).ConfigureAwait(false);
 
         Log.Info($"Finished processing chunk");
     }
