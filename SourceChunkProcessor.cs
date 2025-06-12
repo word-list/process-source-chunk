@@ -40,16 +40,17 @@ public class SourceChunkProcessor
         try
         {
             if (chunkWords is null || chunkWords.Length == 0) return [];
-            var words = chunkWords.Select(w => w.Word).ToArray();
+            var replaceWords = chunkWords.Where(w => w.ReplaceExisting).Select(w => w.Word).ToArray();
+            var checkWords = chunkWords.Where(w => !w.ReplaceExisting).Select(w => w.Word).ToArray();
 
             try
             {
                 var foundWords = await s_wordDb
-                    .GetExistingWordsAsync(words)
+                    .GetExistingWordsAsync(checkWords)
                     .ToArrayAsync()
                     .ConfigureAwait(false);
 
-                return [.. words.Except(foundWords)];
+                return [.. replaceWords.Concat(checkWords.Except(foundWords))];
             }
             catch (Exception ex)
             {
