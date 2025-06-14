@@ -33,7 +33,7 @@ The lambda uses the following environment variables:
 
 ## Common Packages
 
-This project uses the `WordList.Common` shared library (in the `lib-common` repository) which is published on GitHub.  To be able to import it, you'll need to use the following command:
+This project uses the `WordList.Common` shared library (in the `lib-common` repository) and the `WordList.Data.Sql` shared library (in the `lib-sql` repository) which are both published on GitHub.  To be able to import them, you'll need to use the following command:
 
 ```
 dotnet nuget add source --username <your-username> --password <github-PAT> --store-password-in-clear-text --name github "https://nuget.pkg.github.com/word-list/index.json"
