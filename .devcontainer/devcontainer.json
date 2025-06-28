@@ -1,5 +1,5 @@
 {
-    "name": "process-source-chunks",
+    "name": "process-source-chunk",
     "build": {
         "dockerfile": "Dockerfile"
     },
@@ -15,5 +15,9 @@
                 "ms-azuretools.vscode-containers"
             ]
         }
-    }
+    },
+    "runArgs": [
+        "--name",
+        "process-source-chunk-dev-container"
+    ]
 }

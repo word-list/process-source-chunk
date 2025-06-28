@@ -4,6 +4,8 @@ using Amazon.Lambda.RuntimeSupport;
 using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
 using WordList.Common.Messaging;
+using WordList.Common.Status;
+using WordList.Common.Status.Models;
 
 namespace WordList.Processing.ProcessSourceChunk;
 
@@ -26,9 +28,12 @@ public class Function
         {
             if (message is null) continue;
 
+            var status = new StatusClient(message.CorrelationId);
+            await status.UpdateStatusAsync(SourceStatus.PROCESSING).ConfigureAwait(false);
+
             log.Info($"Starting source chunk processing for SourceId {message.SourceId}, ChunkId {message.ChunkId} at key {message.Key}");
 
-            await new SourceChunkProcessor(message.SourceId, message.ChunkId, message.Key, log.WithPrefix($"[SourceId={message.SourceId}]")).ProcessSourceChunkAsync().ConfigureAwait(false);
+            await new SourceChunkProcessor(message.SourceId, message.ChunkId, message.Key, status, log.WithPrefix($"[SourceId={message.SourceId}]")).ProcessSourceChunkAsync().ConfigureAwait(false);
 
             log.Info($"Finished source chunk processing for SourceId {message.SourceId}, ChunkId {message.ChunkId} at key {message.Key}");
         }

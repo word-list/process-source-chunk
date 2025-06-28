@@ -2,8 +2,8 @@ using Amazon.S3;
 using WordList.Common.Logging;
 using WordList.Common.Messaging;
 using WordList.Common.Messaging.Messages;
-using WordList.Data.Sql;
-using System.Linq;
+using WordList.Common.Status;
+using WordList.Common.Words;
 
 namespace WordList.Processing.ProcessSourceChunk;
 
@@ -15,6 +15,7 @@ public class SourceChunkProcessor
     public string SourceId { get; init; }
     public string ChunkId { get; init; }
     public string Key { get; init; }
+    public StatusClient Status { get; init; }
 
     protected ILogger Log { get; init; }
 
@@ -26,12 +27,13 @@ public class SourceChunkProcessor
         public bool ReplaceExisting { get; set; }
     }
 
-    public SourceChunkProcessor(string sourceId, string chunkId, string key, ILogger logger)
+    public SourceChunkProcessor(string sourceId, string chunkId, string key, StatusClient status, ILogger logger)
     {
         SourceId = sourceId;
         ChunkId = chunkId;
         Key = key;
         Log = logger;
+        Status = status;
     }
 
     private async Task<string[]> ShouldProcessBatchAsync(SourceChunkWord[]? chunkWords)
@@ -73,7 +75,7 @@ public class SourceChunkProcessor
 
         var messages = new List<QueryWordMessage>();
 
-        messages.AddRange(words.Where(w => w.ReplaceExisting).Select(w => new QueryWordMessage { Word = w.Word }));
+        messages.AddRange(words.Where(w => w.ReplaceExisting).Select(w => new QueryWordMessage { CorrelationId = Status.StatusId, Word = w.Word }));
 
         Log.Info($"Added {messages.Count} word(s) with ReplaceExisting=true");
 
@@ -92,11 +94,12 @@ public class SourceChunkProcessor
 
         Log.Info($"Should process {shouldProcessWords.Length} message(s)");
 
-        messages.AddRange(shouldProcessWords.Select(word => new QueryWordMessage { Word = word }));
+        messages.AddRange(shouldProcessWords.Select(word => new QueryWordMessage { CorrelationId = Status.StatusId, Word = word }));
 
         Log.Info($"Sending {messages.Count} message(s) in total");
 
         await MessageQueues.QueryWords.SendBatchedMessagesAsync(Log, messages).ConfigureAwait(false);
+        await Status.IncreaseTotalWordsAsync(messages.Count).ConfigureAwait(false);
 
         Log.Info($"Finished processing chunk");
     }
